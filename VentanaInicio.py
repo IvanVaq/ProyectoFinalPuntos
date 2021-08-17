@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+ 
 from PyQt5 import QtWidgets
 from PyQt5 import QtGui
 from PyQt5.QtGui import *
@@ -8,80 +9,74 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 import pygame
+ 
+DATAFILE = "puntos.dat"
 
-#enconding: utf-8
-# Creamos la variable que contendra el archivo con los datos que 
-# despues exportaremos con Json #
-ARCHIVO = "puntos.dat"
 # CRUD -> Create, Read, Update, Delete
+# C
 
-# Método que almacenara los datos en el directorio "ProyetoPutos.dat" #
-# Método que ABRE Y CREA el archivo de almacenaje de puntos  
-    # C (CREATE)#
-def creaArchivo(datos, destino = ARCHIVO):        
+# Método que almacenara los datos en el directorio que le indicamos #
+def almacenar_datos(datos, destino=DATAFILE):
     try:
-        creadorDeArchivo = open(destino, "c")
+        escritor_de_fichero = open(destino, "w")
     except:
-        print("ERROR, no fue posible abrir el archivo")
+        print("ERROR: no he podido abrir el fichero")
         return False
-
-    print("ARCHIVO ABIERTO CORRECTAMENTE")
-
+ 
+    print("ARCHIVO ABIERTO")
+ 
     try:
-        creadorDeArchivo.write(datos)
+        escritor_de_fichero.write(datos)
     except:
-        print("Escritura de datos imposible")
+        print("ERROR: no he podido escribir los datos en el fichero")
         return False
-
-    creadorDeArchivo.close()
+    #   Cerramos la conexion #
+    escritor_de_fichero.close()
     return True
-# Este método lee archivo y muestra los datos convertidos en puntos
-# R (READ)#
-def leeArchivo(lecturaArchivo = ARCHIVO):
+# Método que leera el archivo donde hemos guardado los datos #
+# R
+def leer_datos(fuente=DATAFILE):
     try:
-        leeArchivo = open(lecturaArchivo, "lector")
+        lector_de_fichero = open(fuente, "r")
     except:
-        print("Imposible apertura de archivo")
+        print("ERROR: no he podido abrir el fichero")
         return None
-
-    print("Archivo abierto satisfactoriamente")
-
+ 
+    print("EL ARCHIVO SE ABRIO CORRECTAMENTE")
+ 
     try:
-        datos = leeArchivo.read()
+        datos = lector_de_fichero.read()
     except:
-        print("Imposible lectura de datos")
+        print("ERROR: no he podido leer los datos desde el fichero")
         return None
-
+ 
     if isinstance(datos, str):
         print("DATOS ES UNA CADENA DE TEXTO")
     elif isinstance(datos, list):
         print("DATOS ES UNA LISTA")
     else:
         print("DATOS ES OTRA COSA")
-    
-    leeArchivo.close()
+ 
+    lector_de_fichero.close()
     return datos
-
-    # Método que actualizara el contenido del archivo 
-    # U(UPDATE)#
-def actualizaDatos(datos, destino = ARCHIVO):
-    return creaArchivo(datos = datos, destino = destino)
-
-        
-    # Método que borrara los registros del archivo #
-    # D (DELETE)# 
-def borraDatos(destino = ARCHIVO):
+ 
+# Método que actualizara los datos del archivo # 
+# U
+def actualizar_datos(datos, destino=DATAFILE):
+    return almacenar_datos(datos=datos, destino=destino)
+ 
+# Método que borrara el archivo # 
+# D
+def borrar_datos(destino=DATAFILE):
     try:
         os.remove(destino)
     except:
-        print("No se a podido elimina el archivo")
+        print("ERROR: no he podido BORRAR el fichero")
         return False
-    print("Datos eliminados con exito")
-    return True  
-
-
-
-
+ 
+    print("OK: he podido BORRAR el fichero")
+    return True
+ 
 # Creamos un método que nos mostrara una paleta de colores y nos permitira
 # la elección del color que utilizaremos en nuestro juego #
 def seleccionaColorPaleta():
@@ -91,20 +86,20 @@ def seleccionaColorPaleta():
     else:
         sys.exit()
     return colorin
-
-# Comprobamos si existe el archivo #
+ 
+# Ver si existe el fichero de datos.
 DATOS = None
-resultado = os.path.isfile(ARCHIVO)
+resultado = os.path.isfile(DATAFILE)
 if resultado is True:
-    print("EL archivo existe[%s] " % ARCHIVO)
-    DATOS = leeArchivo(lecturaArchivo = ARCHIVO)
-
+    print("El fichero existe: [%s]" % DATAFILE)
+    DATOS = leer_datos(fuente=DATAFILE)
+ 
     if not DATOS:
-        print("No ha sido posible leer los datos ")
+        # corresponde con: False, None, ERROR-False, 0
+        print("ERROR: No he podido leer los datos (pero puede que no sean NULOS).")
 else:
-    print("El archivo [%s] No existe, imposible importar datos" % ARCHIVO)
-
-# Creamos la lógica del juego #
+    print("El fichero [%s] NO existe. No vamos a importar datos." % DATAFILE)
+ 
 def juego():
     ANCHURA_PANTALLA = 650
     ALTURA_PANTALLA = 500
@@ -154,8 +149,7 @@ def juego():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 print("Dentro del juego")
-                resultado = creaArchivo(datos = json.dumps(circulos))
-                
+                resultado = almacenar_datos(datos = json.dumps(circulos))                
                 if resultado is True:
                     print("Datos guardados con exito")
                 else:
@@ -163,7 +157,6 @@ def juego():
 
                 sys.exit()
                 
-
             elif event.type == pygame.MOUSEBUTTONUP:
                 print("punto nuevo")
                 # Instanciamos el método get_pos que nos devolvera la posición del ratón #
@@ -188,7 +181,6 @@ def juego():
         # Actualizamos la pantalla para que se muestren los cambios #
         
         pygame.display.update() 
-
 
 class VentanaInicio(QMainWindow):
 
@@ -241,7 +233,7 @@ class VentanaInicio(QMainWindow):
         self.btn_BorrarUser = QPushButton('ELIMINAR USUARIO', self)
         self.btn_BorrarUser.setGeometry(30, 240, 130, 30)
         self.btn_BorrarUser.setFont(QtGui.QFont("Fantasy", 8, QtGui.QFont.Black))
-        self.btn_BorrarUser.clicked.connect(borraDatos)
+        self.btn_BorrarUser.clicked.connect(borrar_datos)
 
         # Botón que sale de la app #
         self.btn_salirApp = QPushButton('SALIR', self)
@@ -257,6 +249,6 @@ def main():
     app.exec_()
 
 if __name__ == '__main__':
-    main()
+    main()    
 
  
