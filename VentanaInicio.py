@@ -10,7 +10,7 @@ from PyQt5.QtCore import *
 
 import pygame
  
-DATAFILE = "puntos.dat"
+DATAFILE = "puntos.json"
 
 # CRUD -> Create, Read, Update, Delete
 # C
@@ -250,5 +250,4 @@ def main():
 
 if __name__ == '__main__':
     main()    
-
  
