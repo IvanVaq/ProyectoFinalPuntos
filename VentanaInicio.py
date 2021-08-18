@@ -14,7 +14,7 @@ import pygame
 DATAFILE = "puntos.json"
 
 
-
+# Creacion CRUD con BBDD sin implementar en creación
 def crearBBDD():
 
     try:
