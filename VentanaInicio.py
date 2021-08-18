@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import sqlite3
  
 from PyQt5 import QtWidgets
 from PyQt5 import QtGui
@@ -12,12 +13,33 @@ import pygame
  
 DATAFILE = "puntos.json"
 
+
+
+def crearBBDD():
+
+    try:
+        con = sqlite3.connect("BaseDeDatosPuntos.bd")
+        cursor1 = con.cursor()
+        cursor1.execute('''CREATE TABLE puntos (idNombre INTEGER PRIMARY KEY AUTOINCREMENT,
+                        nombre TEXT (20) NOT NULL,
+                        pos TEXT,
+                        color TEXT)''')    
+        con.commit()
+        print("Tabla creada correctamente")
+    except sqlite3.OperationalError as e:
+        print("Error al abrir",e)
+        con.rollback()#Método que hace que la transaccion se retortaigaal munto de partida
+    con.close()
+    
+    
 # CRUD -> Create, Read, Update, Delete
 # C
 
 # Método que almacenara los datos en el directorio que le indicamos #
 def almacenar_datos(datos, destino=DATAFILE):
     try:
+        # Para abrir el archivo utilizamos el método open y como parametros le indicaremos
+        # la ruta y los permisos como el permiso necesario es de escritura le pasaremos w(write)#
         escritor_de_fichero = open(destino, "w")
     except:
         print("ERROR: no he podido abrir el fichero")
@@ -37,6 +59,8 @@ def almacenar_datos(datos, destino=DATAFILE):
 # R
 def leer_datos(fuente=DATAFILE):
     try:
+        # Para abrir el archivo utilizamos el método open y como parametros le indicaremos
+        # la ruta y los permisos como el permiso necesario es de lectura le pasaremos r(read)#
         lector_de_fichero = open(fuente, "r")
     except:
         print("ERROR: no he podido abrir el fichero")
@@ -67,11 +91,11 @@ def actualizar_datos(datos, destino=DATAFILE):
  
 # Método que borrara el archivo # 
 # D
-def borrar_datos(destino=DATAFILE):
+def borrar_datos():
     try:
-        os.remove(destino)
+        os.remove(DATAFILE)
     except:
-        print("ERROR: no he podido BORRAR el fichero")
+        print("ERROR: Imposible borrar archivo que no existe")
         return False
  
     print("OK: he podido BORRAR el fichero")
@@ -99,6 +123,7 @@ if resultado is True:
         print("ERROR: No he podido leer los datos (pero puede que no sean NULOS).")
 else:
     print("El fichero [%s] NO existe. No vamos a importar datos." % DATAFILE)
+
  
 def juego():
     ANCHURA_PANTALLA = 650
@@ -250,4 +275,3 @@ def main():
 
 if __name__ == '__main__':
     main()    
- 
